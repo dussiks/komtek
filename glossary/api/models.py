@@ -9,6 +9,12 @@ class Guide(models.Model):
     start_date = models.DateTimeField('дата начала действия')
     version = models.CharField(unique=True, null=False)
 
+    class Meta:
+        ordering = ('name',)
+
+    def __str__(self):
+        return self.name
+
 
 class Element(models.Model):
     guide = models.ForeignKey(
@@ -20,3 +26,9 @@ class Element(models.Model):
     )
     code = models.CharField('код', null=False)
     value = models.CharField('значение', null=False)
+
+    class Meta:
+        ordering = ('code',)
+
+    def __str__(self):
+        return self.code
