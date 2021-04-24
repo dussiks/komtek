@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'django_filters',
     'api',
 ]
 
@@ -39,7 +40,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'glossary.urls'
+ROOT_URLCONF = 'glos.urls'
 
 TEMPLATES = [
     {
@@ -57,7 +58,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'glossary.wsgi.application'
+WSGI_APPLICATION = 'glos.wsgi.application'
 
 DATABASES = {
     'default': {
