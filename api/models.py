@@ -7,7 +7,8 @@ class Guide(models.Model):
     id = models.UUIDField(
         'идентификатор',
         primary_key=True,
-        default=uuid.uuid4(),
+        default=uuid.uuid4,
+        editable=False,
     )
     title = models.CharField('наименование', max_length=100)
     slug = models.SlugField('короткое наименование')
@@ -22,41 +23,50 @@ class Guide(models.Model):
     class Meta:
         ordering = ('title',)
 
-    def versions(self):
-        return GuideVersion.objects.filter(guide=self).order_by('-number')
+    def check_versions(self):
+        return GuideVersion.objects.filter(guide=self)
 
     def save(self, *args, **kwargs):
         super(Guide, self).save(*args, **kwargs)
-        guide_versions = self.check_versions()
-        if self.version not in guide_versions:
-            new_version = GuideVersion(
-                guide=self,
-                number=self.version,
-                date_from = self.start_date,
-            )
-            new_version.save()
+        new_guide_version = GuideVersion(
+            guide=self,
+            name=self.version,
+            date_from=self.start_date,
+            guide_unique=self.id,
+        )
+        new_guide_version.save()
 
 
 class GuideVersion(models.Model):
-    number = models.DecimalField(
+    name = models.CharField(
         'версия справочника',
-        max_digits=2,
-        decimal_places=1,
+        max_length=5,
+        null=False,
+        blank=False,
     )
     guide = models.ForeignKey(
         Guide,
+        verbose_name='наименование справочника',
         on_delete=models.CASCADE,
         related_name='versions',
         null=False,
         blank=False,
     )
-    date_from = models.DateField()
-
-    class Meta:
-        unique_together = ('number', 'guide', )
+    guide_unique = models.CharField(
+        'идентификатор справочника',
+        max_length=64,
+    )
+    date_from = models.DateField('дата начала действия')
 
     def __str__(self):
-        return str(self.number)
+        return self.name
+
+    def save(self, *args, **kwargs):
+        current_guide_versions = self.guide.check_versions()
+        versions_list = [x.name for x in current_guide_versions]
+        if self.name not in versions_list:
+            self.guide_unique = self.guide.id
+            super().save(*args, **kwargs)
 
 
 class Element(models.Model):
