@@ -1,50 +1,39 @@
-import uuid
-
 from django.db import models
+from django.db import IntegrityError
 
 
 class Guide(models.Model):
-    id = models.UUIDField(
-        'идентификатор',
-        primary_key=True,
-        default=uuid.uuid4,
-        editable=False,
-    )
     title = models.CharField('наименование', max_length=100)
-    slug = models.SlugField('короткое наименование', unique=True)
-    description = models.TextField('описание')
+    slug = models.SlugField('короткое наименование')
+    description = models.TextField('описание', null=True)
     start_date = models.DateField('дата начала действия')
-    version = models.CharField(
-        max_length=5,
-        null=False,
-        blank=False,
-    )
+
+    @property
+    def version(self):
+        return self.versions.last()
 
     class Meta:
         ordering = ('title',)
-
-    def check_versions(self):
-        return GuideVersion.objects.filter(guide=self)
 
     def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
-        super(Guide, self).save(*args, **kwargs)
-        new_guide_version = GuideVersion(
-            guide=self,
-            name=self.version,
-            date_from=self.start_date,
-            guide_unique=self.id,
-        )
-        new_guide_version.save()
+        is_new = True if not self.id else False
+        super().save(*args, **kwargs)
+        if is_new:
+            GuideVersion.objects.create(
+                name='1.0.0',
+                guide=self,
+                guide_unique=self.id,
+                date_from=self.start_date,
+            )
 
 
 class GuideVersion(models.Model):
     name = models.CharField(
         'версия справочника',
-        max_length=5,
-        null=False,
+        max_length=10,
         blank=False,
     )
     guide = models.ForeignKey(
@@ -57,31 +46,36 @@ class GuideVersion(models.Model):
     )
     guide_unique = models.CharField(
         'идентификатор справочника',
-        max_length=64,
+        help_text='(оставьте пустым, заполнится автоматически)',
+        max_length=32,
         null=True,
         blank=True,
     )
     date_from = models.DateField('дата начала действия')
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['guide_unique', 'name'], name='unique guideversion')
+        ]
+
     def __str__(self):
-        return f'{self.guide} {self.name}'
+        return self.name
 
     def save(self, *args, **kwargs):
-        current_guide_versions = self.guide.check_versions()
-        versions_list = [str(x.name) for x in current_guide_versions]
-        if self.name not in versions_list:
-            self.guide_unique = self.guide.id
+        self.guide_unique = self.guide.id
+        if GuideVersion.objects.filter(guide_unique=self.guide_unique, name=self.name).exists():
+            return f'Версия {self.name} уже существует. Укажите новое имя для версии.'
+        else:
             super().save(*args, **kwargs)
 
 
 class Element(models.Model):
-    code = models.CharField('код', max_length=50, null=False)
-    value = models.CharField('значение', max_length=200, null=False)
+    code = models.CharField('код', max_length=50)
+    value = models.CharField('значение', max_length=200)
     version = models.ManyToManyField(
         GuideVersion,
         verbose_name='версия справочника',
         related_name='elements',
-        default=None,
         blank=True,
     )
 

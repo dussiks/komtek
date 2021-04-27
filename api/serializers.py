@@ -6,7 +6,7 @@ from .models import Element, Guide, GuideVersion
 class GuideSerializer(serializers.ModelSerializer):
     class Meta:
         model = Guide
-        fields = ('id', 'title', 'description', 'start_date', 'version')
+        fields = ('title', 'description', 'start_date', 'version')
         lookup_field = 'slug'
 
 
