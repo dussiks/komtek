@@ -4,19 +4,30 @@ from .models import Element, Guide, GuideVersion
 
 
 class GuideSerializer(serializers.ModelSerializer):
+    start_date = serializers.ReadOnlyField()
+    version = serializers.ReadOnlyField()
+
     class Meta:
         model = Guide
-        fields = ('title', 'description', 'start_date', 'version')
+        fields = ('title', 'slug', 'description', 'start_date', 'version')
         lookup_field = 'slug'
 
 
 class GuideVersionSerializer(serializers.ModelSerializer):
+    guide = serializers.SlugRelatedField(
+        many=False,
+        read_only=True,
+        slug_field='slug',
+    )
+
     class Meta:
         model = GuideVersion
         fields = ('name', 'date_from', 'guide')
 
 
 class ElementSerializer(serializers.ModelSerializer):
+    version = GuideVersionSerializer(many=True, read_only=True)
+
     class Meta:
         model = Element
-        fields = '__all__'
+        fields = ('code', 'value', 'version')

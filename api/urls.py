@@ -7,7 +7,7 @@ from .views import GuideViewSet, ElementViewSet
 v1_router = DefaultRouter()
 v1_router.register('guides', GuideViewSet, basename='guides')
 v1_router.register(
-    r'guides/(?P<slug>\d+)/elements',
+    r'guides/(?P<slug>\d+)/(?P<guideversion_id>\d+)/elements',
     ElementViewSet,
     basename='elements',
 )

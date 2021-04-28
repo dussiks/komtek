@@ -1,22 +1,29 @@
 from django.db import models
-from django.db import IntegrityError
+from datetime import date
 
 
 class Guide(models.Model):
-    title = models.CharField('наименование', max_length=100)
-    slug = models.SlugField('короткое наименование')
+    """
+    At first Guide object creation automatically save first default version
+    for current object with version name 1.0.0.
+    """
+    title = models.CharField('наименование справочника', max_length=100)
+    slug = models.SlugField('короткое наименование', max_length=30)
     description = models.TextField('описание', null=True)
-    start_date = models.DateField('дата начала действия')
 
     @property
     def version(self):
-        return self.versions.last()
+        return self.versions.last().name
+
+    @property
+    def start_date(self):
+        return self.versions.last().date_from.strftime('%m-%d-%Y')
 
     class Meta:
         ordering = ('title',)
 
     def __str__(self):
-        return self.title
+        return self.slug
 
     def save(self, *args, **kwargs):
         is_new = True if not self.id else False
@@ -26,7 +33,7 @@ class Guide(models.Model):
                 name='1.0.0',
                 guide=self,
                 guide_unique=self.id,
-                date_from=self.start_date,
+                date_from=date.today(),
             )
 
 
@@ -46,7 +53,6 @@ class GuideVersion(models.Model):
     )
     guide_unique = models.CharField(
         'идентификатор справочника',
-        help_text='(оставьте пустым, заполнится автоматически)',
         max_length=32,
         null=True,
         blank=True,
@@ -55,18 +61,18 @@ class GuideVersion(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['guide_unique', 'name'], name='unique guideversion')
+            models.UniqueConstraint(
+                fields=['guide_unique', 'name'],
+                name='unique guideversion'
+            )
         ]
 
     def __str__(self):
-        return self.name
+        return f'{self.guide} v.{self.name}'
 
     def save(self, *args, **kwargs):
         self.guide_unique = self.guide.id
-        if GuideVersion.objects.filter(guide_unique=self.guide_unique, name=self.name).exists():
-            return f'Версия {self.name} уже существует. Укажите новое имя для версии.'
-        else:
-            super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
 
 class Element(models.Model):
@@ -75,6 +81,7 @@ class Element(models.Model):
     version = models.ManyToManyField(
         GuideVersion,
         verbose_name='версия справочника',
+        help_text='Выберите версии справочников для элемента.',
         related_name='elements',
         blank=True,
     )

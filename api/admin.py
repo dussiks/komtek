@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from .forms import GuideVersionAdminForm
 from .models import Element, Guide, GuideVersion
 
 
@@ -14,6 +15,7 @@ admin.site.register(Guide, GuideAdmin)
 
 
 class GuideVersionAdmin(admin.ModelAdmin):
+    form = GuideVersionAdminForm
     list_display = ('name', 'guide', 'date_from')
     list_filter = ('name',)
     empty_value_display = '-пусто-'
