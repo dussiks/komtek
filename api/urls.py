@@ -1,15 +1,15 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from .views import GuideViewSet, ElementViewSet
+from .views import ElementViewSet, GuideViewSet, GuideVersionViewSet
 
 
 v1_router = DefaultRouter()
 v1_router.register('guides', GuideViewSet, basename='guides')
 v1_router.register(
-    r'guides/(?P<slug>\d+)/(?P<guideversion_id>\d+)/elements',
-    ElementViewSet,
-    basename='elements',
+    r'guides/(?P<guide_id>\d+)/versions',
+    GuideVersionViewSet,
+    basename='version',
 )
 
 urlpatterns = [

@@ -9,8 +9,7 @@ class GuideSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Guide
-        fields = ('title', 'slug', 'description', 'start_date', 'version')
-        lookup_field = 'slug'
+        fields = ('id', 'title', 'description', 'start_date', 'version')
 
 
 class GuideVersionSerializer(serializers.ModelSerializer):
@@ -22,7 +21,7 @@ class GuideVersionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GuideVersion
-        fields = ('name', 'date_from', 'guide')
+        fields = ('name', 'date_from', 'guide', 'guide_unique')
 
 
 class ElementSerializer(serializers.ModelSerializer):
