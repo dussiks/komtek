@@ -9,7 +9,12 @@ v1_router.register('guides', GuideViewSet, basename='guides')
 v1_router.register(
     r'guides/(?P<guide_id>\d+)/versions',
     GuideVersionViewSet,
-    basename='version',
+    basename='versions',
+)
+v1_router.register(
+    r'guides/(?P<guide_id>\d+)/versions/(?P<version_id>\d+)/elements',
+    ElementViewSet,
+    basename='elements',
 )
 
 urlpatterns = [

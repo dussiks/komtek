@@ -8,7 +8,7 @@ class Guide(models.Model):
     for current object with version name 1.0.0.
     """
     title = models.CharField('наименование справочника', max_length=100)
-    slug = models.SlugField('короткое наименование', max_length=30)
+    slug = models.SlugField('короткое наименование', max_length=30, unique=True)
     description = models.TextField('описание', null=True)
 
     @property
@@ -17,7 +17,7 @@ class Guide(models.Model):
 
     @property
     def start_date(self):
-        return self.versions.last().date_from.strftime('%m-%d-%Y')
+        return self.versions.last().date_from
 
     class Meta:
         ordering = ('title',)
@@ -38,6 +38,12 @@ class Guide(models.Model):
 
 
 class GuideVersion(models.Model):
+    """
+    Edition of current GuideVersion object except in Django Admin form will
+    cause IntegrityError because if UniqueConstraint condition. If other
+    interface for edition will be necessary - validation of input fields
+    should be provided to avoid exception.
+    """
     name = models.CharField(
         'версия справочника',
         max_length=10,
@@ -63,7 +69,7 @@ class GuideVersion(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=['guide_unique', 'name'],
-                name='unique guideversion'
+                name='unique_guide_version'
             )
         ]
 

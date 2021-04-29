@@ -21,12 +21,11 @@ class GuideVersionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GuideVersion
-        fields = ('name', 'date_from', 'guide', 'guide_unique')
+        fields = ('id', 'name', 'date_from', 'guide', 'guide_unique')
 
 
 class ElementSerializer(serializers.ModelSerializer):
-    version = GuideVersionSerializer(many=True, read_only=True)
 
     class Meta:
         model = Element
-        fields = ('code', 'value', 'version')
+        fields = ('code', 'value')
