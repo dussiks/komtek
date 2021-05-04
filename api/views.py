@@ -23,6 +23,8 @@ class GuideViewSet(ReadOnlyModelViewSet):
             if search_date is not None:
                 guide_vers = GuideVersion.objects.filter(
                     date_from__lte=search_date
+                ).select_related(
+                    'guide'
                 )
                 queryset = Guide.objects.prefetch_related(
                     Prefetch('versions', queryset=guide_vers)
