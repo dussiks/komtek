@@ -1,6 +1,8 @@
 from django.db import models
 from datetime import date
 
+from django.utils.functional import cached_property
+
 
 class Guide(models.Model):
     """
@@ -11,13 +13,20 @@ class Guide(models.Model):
     slug = models.SlugField('короткое наименование', max_length=30, unique=True)
     description = models.TextField('описание', null=True)
 
-    @property
-    def version(self):
-        return self.versions.last().name
+    def search_date_version(self, ser):
+        existing_versions = self.versions.filter(date_from__lt=ser)
+        if existing_versions:
+            return existing_versions.order_by('date_from').last()
 
-    @property
+    @cached_property
+    def version(self):
+        versions = self.versions
+        if versions:
+            return versions.latest().name
+
+    @cached_property
     def start_date(self):
-        return self.versions.last().date_from
+        return self.versions.latest().date_from
 
     class Meta:
         ordering = ('title',)
@@ -66,6 +75,7 @@ class GuideVersion(models.Model):
     date_from = models.DateField('дата начала действия')
 
     class Meta:
+        get_latest_by = 'date_from'
         constraints = [
             models.UniqueConstraint(
                 fields=['guide_unique', 'name'],
