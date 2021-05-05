@@ -1,5 +1,5 @@
-from django.db import models
 from datetime import date
+from django.db import models
 
 from django.utils.functional import cached_property
 
@@ -12,11 +12,6 @@ class Guide(models.Model):
     title = models.CharField('наименование справочника', max_length=100)
     slug = models.SlugField('короткое наименование', max_length=30, unique=True)
     description = models.TextField('описание', null=True)
-
-    def search_date_version(self, ser):
-        existing_versions = self.versions.filter(date_from__lt=ser)
-        if existing_versions:
-            return existing_versions.order_by('date_from').last()
 
     @cached_property
     def version(self):
