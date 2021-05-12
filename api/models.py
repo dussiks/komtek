@@ -9,8 +9,17 @@ class Guide(models.Model):
     At first Guide object creation automatically save first default version
     for current object with version name 1.0.0.
     """
-    title = models.CharField('наименование справочника', max_length=100)
-    slug = models.SlugField('короткое наименование', max_length=30, unique=True)
+    title = models.CharField(
+        'наименование справочника',
+        max_length=100,
+        unique=True,
+    )
+    slug = models.SlugField(
+        'короткое наименование',
+        max_length=30,
+        unique=True,
+        allow_unicode=True,
+    )
     description = models.TextField('описание', null=True)
 
     @cached_property
@@ -27,7 +36,7 @@ class Guide(models.Model):
         ordering = ('title',)
 
     def __str__(self):
-        return self.slug
+        return self.title
 
     def save(self, *args, **kwargs):
         is_new = True if not self.id else False
@@ -87,7 +96,7 @@ class GuideVersion(models.Model):
 
 
 class Element(models.Model):
-    code = models.CharField('код', max_length=50)
+    code = models.CharField('код', max_length=50, unique=True)
     value = models.CharField('значение', max_length=200)
     version = models.ManyToManyField(
         GuideVersion,

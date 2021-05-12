@@ -25,9 +25,13 @@ admin.site.register(GuideVersion, GuideVersionAdmin)
 
 
 class ElementAdmin(admin.ModelAdmin):
-    list_display = ('code', 'value')
+    list_display = ('code', 'value', 'show_versions')
     list_filter = ('code', )
     empty_value_display = '-пусто-'
+
+    @admin.action(description='версии')
+    def show_versions(self, obj):
+        return ', '.join([str(a) for a in obj.version.all()])
 
 
 admin.site.register(Element, ElementAdmin)
