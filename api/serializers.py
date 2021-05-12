@@ -22,7 +22,7 @@ class GuideSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Guide
-        fields = ('id', 'title', 'description', 'version', 'start_date')
+        fields = ('title', 'id', 'description', 'version', 'start_date')
 
 
 class ElementSerializer(serializers.ModelSerializer):

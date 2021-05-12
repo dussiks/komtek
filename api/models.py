@@ -23,14 +23,19 @@ class Guide(models.Model):
     description = models.TextField('описание', null=True)
 
     @cached_property
-    def version(self):
-        versions = self.versions
+    def version(self):  # в запрос попадают только объекты с датой версии не позднее текущей даты.
+        versions = self.versions.exclude(date_from__gt=date.today())
         if versions:
             return versions.latest().name
 
     @cached_property
     def start_date(self):
-        return self.versions.latest().date_from
+        try:
+            version = GuideVersion.objects.get(guide_unique=self.id,
+                                               name=self.version)
+        except GuideVersion.DoesNotExist:
+            return
+        return version.date_from
 
     class Meta:
         ordering = ('title',)

@@ -1,6 +1,9 @@
 from django.db.models import Prefetch
+from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import ReadOnlyModelViewSet
+from rest_framework.response import Response
 
 from .models import Guide, GuideVersion
 from .permissions import IsAdminOrReadOnly
@@ -27,6 +30,28 @@ class GuideViewSet(ReadOnlyModelViewSet):
                     Prefetch('versions', queryset=guide_vers)
                 )
         return queryset
+
+
+@api_view(['GET', ])
+@permission_classes([IsAdminOrReadOnly])
+def actual_elements(request, guide_id):
+    guide_fail_text = ('Не обнаружен справочник с заданным идентификатором. '
+                       'Введите корректный id справочника.')
+    try:
+        guide = Guide.objects.get(id=guide_id)
+    except Guide.DoesNotExist:
+        return Response(guide_fail_text, status=status.HTTP_400_BAD_REQUEST)
+    last_version = guide.version
+    version_fail_text = 'У заданного справочника нет актуальных версий.'
+    try:
+        version = GuideVersion.objects.get(
+            guide_unique=guide_id, name=last_version
+        )
+    except GuideVersion.DoesNotExist:
+        return Response(version_fail_text, status=status.HTTP_400_BAD_REQUEST)
+    queryset = version.elements.all()
+    serializer = ElementSerializer(queryset, many=True)
+    return Response(serializer.data)
 
 
 class GuideVersionViewSet(ReadOnlyModelViewSet):
