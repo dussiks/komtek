@@ -3,4 +3,5 @@ venv/
 db.sqlite3
 __pycache__/
 api/__pycache__/
+api/migrations/__pycache__/
 glos/__pycache__/

@@ -5,7 +5,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework.response import Response
 
-from .models import Guide, GuideVersion, Element
+from .models import Guide, GuideVersion
 from .permissions import IsAdminOrReadOnly
 from .serializers import (ElementSerializer, GuideSerializer,
                           GuideVersionSerializer, VersionDateSerializer)
