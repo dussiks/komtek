@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 
 from .models import Element, Guide, GuideVersion
 
@@ -14,6 +15,10 @@ class GuideVersionSerializer(serializers.ModelSerializer):
         model = GuideVersion
         fields = ('id', 'name', 'date_from', 'guide', 'guide_unique')
         read_only_fields = ['id', 'guide_unique']
+        validators = [UniqueTogetherValidator(
+            queryset=GuideVersion.objects.all(),
+            fields=['name', 'guide_unique']
+        )]
 
 
 class GuideSerializer(serializers.ModelSerializer):

@@ -5,7 +5,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework.response import Response
 
-from .models import Guide, GuideVersion
+from .models import Guide, GuideVersion, Element
 from .permissions import IsAdminOrReadOnly
 from .serializers import (ElementSerializer, GuideSerializer,
                           GuideVersionSerializer, VersionDateSerializer)
@@ -45,7 +45,8 @@ def actual_elements(request, guide_id):
     version_fail_text = 'У заданного справочника нет актуальных версий.'
     try:
         version = GuideVersion.objects.get(
-            guide_unique=guide_id, name=last_version
+            guide_unique=guide_id,
+            name=last_version
         )
     except GuideVersion.DoesNotExist:
         return Response(version_fail_text, status=status.HTTP_400_BAD_REQUEST)
@@ -70,9 +71,11 @@ class ElementViewSet(ReadOnlyModelViewSet):
     permission_classes = (IsAdminOrReadOnly, )
 
     def get_queryset(self):
+        guide = get_object_or_404(Guide, pk=self.kwargs.get('guide_id'))
         guide_version = get_object_or_404(
             GuideVersion,
-            pk=self.kwargs.get('version_id')
+            pk=self.kwargs.get('version_id'),
+            guide_unique=guide.id,
         )
         queryset = guide_version.elements.all()
         return queryset

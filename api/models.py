@@ -31,8 +31,9 @@ class Guide(models.Model):
     @cached_property
     def start_date(self):
         try:
-            version = GuideVersion.objects.get(guide_unique=self.id,
-                                               name=self.version)
+            version = GuideVersion.objects.get(
+                guide_unique=self.id, name=self.version
+            )
         except GuideVersion.DoesNotExist:
             return
         return version.date_from
